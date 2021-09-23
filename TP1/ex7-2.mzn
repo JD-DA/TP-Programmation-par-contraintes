@@ -12,7 +12,7 @@ constraint S*1000 + E*100 +N*10 +D + M*1000+O*100+S*10+T = M*10000+O*1000+N*100+
 
 constraint alldifferent([S,E,N,D,M,O,T,Y]);
 
-solve satisfy;
+solve maximize M*10000+O*1000+N*100+E*10+Y;
 
 
 output ["  \(S)\(E)\(N)\(D)\n",
