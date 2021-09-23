@@ -12,3 +12,5 @@ constraint forall(i,j in 1..nr where i<j /\ graphe[i,j]!=0)(
 %ou bien 
 % constraint forall (i,j in 1..nr where i<j)(if graphe[i,j]!=0 then couleur[i]!=couleur[j] endif);
 solve satisfy;
+
+output ["region " ++ " : "++ show(couleur[i]) ++ "\t" | i in 1..nr];
