@@ -88,6 +88,7 @@ class Superieur(Constraint):
         self.v2 = v2
     
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        #if(len(domains[self.v1])==0)
         return not((max(domains[self.v1])>min(domains[self.v2]))) #le plus grand élément de v1 est sup ou plus petit de v2
     
     def checkSupport(self, var, value, domains) -> bool:

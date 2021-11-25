@@ -43,6 +43,8 @@ class Solver:
     # lorsqu'on arrive à une solution on affiche la solution
     # puis continuer pour trouver toutes les solutions
     def bt_forward(self, csp):
+        self.nbNodes = self.nbNodes + 1
+        print(csp.domains)
         if (csp.singleton()):
             if (csp.satisfied()):
                 print(csp.solution())
@@ -58,8 +60,8 @@ class Solver:
             csp_res.domains[var] = [i]
             # on va réduire le domaine de chaque domaine
             self.fw_check(csp_res, var)
-            if (csp_res.consistent(var)):
-                self.backtracking_search(csp_res)
+            if (not(csp_res.emptyDomain()) and csp_res.consistent(var)):
+                self.bt_forward(csp_res)
 
     # forward checking du CSP avec la variable var qui vient d'être instanciée
     def fw_check(self, csp, var):
@@ -69,12 +71,14 @@ class Solver:
                 varTest = j
             else:
                 varTest = i
+            self.revise(varTest,csp,constraint)
 
-            for index in range(len(csp.domains[varTest])):
+            """for index in range(len(csp.domains[varTest])):
                 newDomaine = copy.deepcopy(csp.domains[varTest])
                 if not(constraint.checkSupport(varTest,csp.domains[varTest][index],csp.domains)):
                     newDomaine.pop(index)
-            csp.domains[varTest] = newDomaine
+            csp.domains[varTest] = newDomaine"""
+
 
     # supprimer les valeurs inconsistantes dans le domaine de revisedVar
     # par rapport à la contrainte constr
