@@ -43,20 +43,106 @@ class Different(Constraint):
         self.v2 = v2
 
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
-        pass
-    
+        cardV1 = len(domains[self.v1])
+        cardV2 = len(domains[self.v2])
+        if(cardV2>1 or cardV1>1):   #si un des domaines a une cardinalitée supérieure à 1 alors c'est satisfiable
+            return False
+        return (cardV2==0 or cardV2==0) or domains[self.v1][0]==domains[self.v2][0]
+
+
     def checkSupport(self, var, value, domains) -> bool:
-        pass
-    
+        if var==self.v1:
+            varTest = self.v2
+        else:
+            varTest = self.v1
+        for valueTest in domains[varTest]:
+            if(value != valueTest):
+                return True
+        return False
+
+class Egalite(Constraint):
+    def __init__(self, v1, v2) -> None:
+        super().__init__([v1, v2])
+        self.v1 = v1
+        self.v2 = v2
+
+    def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        return not (
+        (max(domains[self.v1]) >= min(domains[self.v2]) and min(domains[self.v1]) <= min(domains[self.v2])) or (max(domains[self.v2]) >= min(domains[self.v1]) and max(domains[self.v2]) <= max(domains[self.v1])))  # le plus grand élément de v1 est sup ou plus petit de v2
+
+    def checkSupport(self, var, value, domains) -> bool:
+        if var==self.v1:
+            varTest = self.v2
+        else:
+            varTest = self.v1
+        for valueTest in domains[varTest]:
+            if(value == valueTest):
+                return True
+        return False
+
+    ##contraintes binaires, ac3, heuristiques
 class Superieur(Constraint):
-    def __init__(self, v1: str, v2:str):
-        pass
+    def __init__(self, v1: str, v2: str):
+        super().__init__([v1,v2])
+        self.v1 = v1
+        self.v2 = v2
     
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
-        pass
+        return not((max(domains[self.v1])>min(domains[self.v2]))) #le plus grand élément de v1 est sup ou plus petit de v2
     
     def checkSupport(self, var, value, domains) -> bool:
-        pass
+        if var==self.v1:
+            return value>min(domains[self.v2])
+        else:
+            return value<max(domains[self.v1])
+
+
+class SuperieurOuEgal(Constraint):
+    def __init__(self, v1: str, v2: str):
+        super().__init__([v1, v2])
+        self.v1 = v1
+        self.v2 = v2
+
+    def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        return not (
+        (max(domains[self.v1]) >= min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
+
+    def checkSupport(self, var, value, domains) -> bool:
+        if var == self.v1:
+            return value >= min(domains[self.v2])
+        else:
+            return value <= max(domains[self.v1])
+class Inferieur(Constraint):
+    def __init__(self, v1: str, v2: str):
+        super().__init__([v1, v2])
+        self.v1 = v1
+        self.v2 = v2
+
+    def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        return not (
+        (max(domains[self.v1]) < min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
+
+    def checkSupport(self, var, value, domains) -> bool:
+        if var == self.v1:
+            return value < min(domains[self.v2])
+        else:
+            return value > max(domains[self.v1])
+
+class InferieurOuEgal(Constraint):
+    def __init__(self, v1: str, v2: str):
+        super().__init__([v1, v2])
+        self.v1 = v1
+        self.v2 = v2
+
+    def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        return not (
+        (max(domains[self.v1]) >= min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
+
+    def checkSupport(self, var, value, domains) -> bool:
+        if var == self.v1:
+            return value >= min(domains[self.v2])
+        else:
+            return value <= max(domains[self.v1])
 
 class Table(Constraint):
     def __init__(self, varList, tupleTable):
@@ -64,8 +150,22 @@ class Table(Constraint):
         self.table = tupleTable
         
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
-        pass
+        for (i,j) in self.table:
+            if i in domains[self.variables[0]] and  j in domains[self.variables[1]]:
+                return False
+        return True
     
     def checkSupport(self, var, value, domains) -> bool:
-        pass
+        if var==self.variables[0]:
+            indice = 0
+            varTest = self.variables[1]
+        else:
+            indice = 1
+            varTest = self.variables[0]
+        for (i,j) in self.table :
+            if([i,j][indice]==value):
+                return True
+        return False
+
+
 
