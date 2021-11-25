@@ -64,6 +64,15 @@ class CSP:
                 return var
         return None
 
+    # retourner une variable non affectée
+    def unassignedVar(self,heuristic) -> Var:
+        if(heuristic = "croissant"):
+            pass
+        for var in self.variables:
+            if len(self.domains[var]) > 1:
+                return var
+        return None
+
     # créer une copie des domaines
     def domainsCopy(self) :
         d_copy = self.domains.copy()

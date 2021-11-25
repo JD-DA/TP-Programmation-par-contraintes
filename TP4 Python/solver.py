@@ -1,5 +1,6 @@
 # fonctionnement d'un solveur CSP
 import copy
+from queue import Queue
 
 from constraint import Constraint, Var, Value
 from csp import CSP
@@ -54,6 +55,8 @@ class Solver:
         var = csp.unassignedVar()
 
         for i in csp.domains[var]:
+            if(var=="x" and i==2):
+                test = True
             csp_res = CSP(csp.variables, csp.domainsCopy())
             csp_res.ctrList = csp.ctrList
             csp_res.vcList = csp.vcList
@@ -69,8 +72,10 @@ class Solver:
             (i,j)=constraint.variables
             if i==var:
                 varTest = j
-            else:
+            elif j==var:
                 varTest = i
+            else:
+                continue
             self.revise(varTest,csp,constraint)
 
             """for index in range(len(csp.domains[varTest])):
@@ -97,12 +102,59 @@ class Solver:
     # lorsqu'on arrive à une solution on affiche la solution
     # puis continuer pour trouver toutes les solutions
     def bt_propagation(self, csp, choixAC):
-        pass
+        self.nbNodes = self.nbNodes + 1
+        choixAC(csp)
+        print(csp.domains)
+        if (csp.singleton()):
+                print(csp.solution())
+        else:
+            var = csp.unassignedVar()
+
+            for i in csp.domains[var]:
+                csp_res = CSP(csp.variables, csp.domainsCopy())
+                csp_res.ctrList = csp.ctrList
+                csp_res.vcList = csp.vcList
+                csp_res.domains[var] = [i]
+                self.bt_propagation(csp_res,choixAC)
+
+
+    def reviseNotify(self, revisedVar, csp, constr):
+        dom_copy = {}
+        notify = False
+        for var in constr.variables:
+            dom_copy[var] = csp.domains[var].copy()
+        listVal = csp.domains[revisedVar].copy()
+        for val in listVal:
+            dom_copy[revisedVar] = [val]
+            if constr.unsat(dom_copy):
+                csp.domains[revisedVar].remove(val)
+                notify = True
+        return notify
 
     # le CSP a seulement des contraintes binaires
     def propagate_AC1(self, csp):
-        pass
+        reviseVal = True
+        while (reviseVal):
+            reviseVal = False
+            for constr in csp.ctrList:
+                reviseVal = reviseVal or self.reviseNotify(constr.variables[0], csp, constr)
+                reviseVal = reviseVal or self.reviseNotify(constr.variables[1], csp, constr)
+
     
     # le CSP a seulement des contraintes binaires
     def propagate_AC3(self, csp):
-        pass
+        queue = Queue()
+        for constr in csp.ctrList:
+            queue.put((constr,0))
+            queue.put((constr,1))
+        reviseVal = True
+        while (not(queue.empty())):
+            (constr,i) = queue.get()
+            reviseVal = self.reviseNotify(constr.variables[i], csp, constr)
+            if(reviseVal):
+                for constr1 in csp.ctrList:
+                    if(constr1!=constr):
+                        if(constr1.variables[0]==constr.variables[i]):
+                            queue.put((constr1,1))
+                        elif(constr1.variables[1]==constr.variables[i]):
+                            queue.put((constr1,0))

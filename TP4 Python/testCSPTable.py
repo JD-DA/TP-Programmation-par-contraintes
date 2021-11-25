@@ -17,11 +17,11 @@ if __name__ == "__main__":
     csp.add_constraint(Table(['y','z'],[[1,2],[3,1],[3,3]]))
     
     solver = Solver()
-    #solver.backtracking_search(csp)
-    #solver.bt_forward(csp)
+    #solver.backtracking_search(csp) #7
+    #solver.bt_forward(csp) #5
     #solver.propagate_AC1(csp)
     #print(csp.domains)
-    solver.bt_propagation(csp)
+    solver.bt_propagation(csp,solver.propagate_AC3) #3
     print("Number of nodes: ",solver.nbNodes)
         
 

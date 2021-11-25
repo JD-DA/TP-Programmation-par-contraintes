@@ -47,6 +47,8 @@ class Different(Constraint):
         cardV2 = len(domains[self.v2])
         if(cardV2>1 or cardV1>1):   #si un des domaines a une cardinalitée supérieure à 1 alors c'est satisfiable
             return False
+        if(cardV2==0 or cardV1==0):
+            return True
         return (cardV2==0 or cardV2==0) or domains[self.v1][0]==domains[self.v2][0]
 
 
@@ -67,6 +69,8 @@ class Egalite(Constraint):
         self.v2 = v2
 
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        if(len(domains[self.v1])==0 or len(domains[self.v2])==0):
+            return True
         return not (
         (max(domains[self.v1]) >= min(domains[self.v2]) and min(domains[self.v1]) <= min(domains[self.v2])) or (max(domains[self.v2]) >= min(domains[self.v1]) and max(domains[self.v2]) <= max(domains[self.v1])))  # le plus grand élément de v1 est sup ou plus petit de v2
 
@@ -88,7 +92,8 @@ class Superieur(Constraint):
         self.v2 = v2
     
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
-        #if(len(domains[self.v1])==0)
+        if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
+            return True
         return not((max(domains[self.v1])>min(domains[self.v2]))) #le plus grand élément de v1 est sup ou plus petit de v2
     
     def checkSupport(self, var, value, domains) -> bool:
@@ -105,6 +110,8 @@ class SuperieurOuEgal(Constraint):
         self.v2 = v2
 
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
+            return True
         return not (
         (max(domains[self.v1]) >= min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
 
@@ -120,6 +127,8 @@ class Inferieur(Constraint):
         self.v2 = v2
 
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
+            return True
         return not (
         (max(domains[self.v1]) < min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
 
@@ -136,6 +145,8 @@ class InferieurOuEgal(Constraint):
         self.v2 = v2
 
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
+            return True
         return not (
         (max(domains[self.v1]) >= min(domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
 
@@ -151,6 +162,8 @@ class Table(Constraint):
         self.table = tupleTable
         
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
+        if (len(domains[self.variables[0]]) == 0 or len(domains[self.variables[1]]) == 0):
+            return True
         for (i,j) in self.table:
             if i in domains[self.variables[0]] and  j in domains[self.variables[1]]:
                 return False

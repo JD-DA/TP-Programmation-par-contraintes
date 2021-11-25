@@ -16,9 +16,9 @@ if __name__ == "__main__":
 
     solver = Solver()
     #solver.backtracking_search(csp)
-    solver.bt_forward(csp)
+    #solver.bt_forward(csp)
     #solver.propagate_AC1(csp)
     #print(csp.domains)
-    #solver.bt_propagation(csp)
+    solver.bt_propagation(csp,solver.propagate_AC3)
     print("Number of nodes: ",solver.nbNodes)
         
