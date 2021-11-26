@@ -108,7 +108,10 @@ class Solver:
         if (csp.singleton()):
                 print(csp.solution())
         else:
-            var = csp.unassignedVar()
+            #var=csp.unassignedVar()
+            #var = csp.unassigned_var_spec("croissantDegréDyn")
+            #var = csp.unassigned_var_spec("decroissantSupport")
+            var = csp.unassigned_var_spec("croissantSupport")
 
             for i in csp.domains[var]:
                 csp_res = CSP(csp.variables, csp.domainsCopy())
