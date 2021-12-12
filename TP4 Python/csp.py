@@ -2,6 +2,7 @@
 
 from typing import Generic, TypeVar, Dict, List, Optional
 from constraint import Constraint, Var, Value
+from statistics import median,mean
 
 
 # Un CSP est définit par une liste de variables chacune avec son domaine
@@ -74,18 +75,42 @@ class CSP:
             i, j = constr.variables[0], constr.variables[1]
             if i == var or j == var:
                 num += constr.getNumSupport(var, self.domains)
-        print("For "+var+" : "+str(num))
         return num
 
     # retourner une variable non affectée
     def unassigned_var_spec(self, heuristic) -> Var:
-        if heuristic == "croissantDegréDyn":  # ordonne dans l'ordre décroissant des degrés à chaque appel
-            self.variables.sort(key=(lambda x: len(self.domains[x])))
+        if heuristic == "croissantDegreDyn":  # ordonne dans l'ordre croissant des degrés à chaque appel
+            self.variables.sort(key=(lambda x: len(self.domains[x])), reverse=False)
+        elif (heuristic == "decroissantDegreDyn"):\
+            self.variables.sort(key=(lambda x: len(self.domains[x])), reverse=True)
         elif (heuristic == "decroissantSupport"):
             self.variables.sort(key=(lambda x: self.getNombreSupport(x)), reverse=True)
         elif (heuristic == "croissantSupport"):
             self.variables.sort(key=(lambda x: self.getNombreSupport(x)), reverse=False)
-        print(self.variables)
+        elif (heuristic == "medianeProcheCroissant"):
+            list_nb_support=[]
+            for i in self.variables:
+                list_nb_support.append(self.getNombreSupport(i))
+            mediane = median(list_nb_support)
+            self.variables.sort(key=(lambda x: abs(mediane-self.getNombreSupport(x))), reverse=False)
+        elif heuristic == "medianeProcheDecroissant":
+            list_nb_support=[]
+            for i in self.variables:
+                list_nb_support.append(self.getNombreSupport(i))
+            mediane = median(list_nb_support)
+            self.variables.sort(key=(lambda x: abs(mediane-self.getNombreSupport(x))), reverse=True)
+        elif (heuristic == "moyenneProcheCroissant"):
+            list_nb_support=[]
+            for i in self.variables:
+                list_nb_support.append(self.getNombreSupport(i))
+            mediane = mean(list_nb_support)
+            self.variables.sort(key=(lambda x: abs(mediane-self.getNombreSupport(x))), reverse=False)
+        elif (heuristic == "moyenneProcheDeroissant"):
+            list_nb_support=[]
+            for i in self.variables:
+                list_nb_support.append(self.getNombreSupport(i))
+            mediane = mean(list_nb_support)
+            self.variables.sort(key=(lambda x: abs(mediane-self.getNombreSupport(x))), reverse=False)
         for var in self.variables:
             if len(self.domains[var]) > 1:
                 return var

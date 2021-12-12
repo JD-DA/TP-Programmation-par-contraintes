@@ -21,7 +21,8 @@ if __name__ == "__main__":
     #solver.bt_forward(csp) #5
     #solver.propagate_AC1(csp)
     #print(csp.domains)
-    solver.bt_propagation(csp,solver.propagate_AC3) #3
+    solver.bt_propagation(csp,solver.propagate_AC4) #3
+
     print("Number of nodes: ",solver.nbNodes)
         
 

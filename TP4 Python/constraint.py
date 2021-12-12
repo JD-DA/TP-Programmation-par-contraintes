@@ -29,6 +29,12 @@ class Constraint(ABC):
     def getNumSupport(self, var: Var, domains: Dict[Var, List[Value]]) -> bool:
         ...
 
+    # tester si la valeur "value1" de la variable "var1" a "value2" pour support dans "var2"
+    @abstractmethod
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        ...
+
     # enlever les valeurs sans support de la variable "revisedVar"
     # retourner True si ces valeurs existent
     def propagate(self, revisedVar, domains: Dict[Var, List[Value]]) -> bool:
@@ -79,6 +85,10 @@ class Different(Constraint):
                 if val != val_to_test: nb_support += 1
         return nb_support
 
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        return value1 != value2
+
 
 class Egalite(Constraint):
     def __init__(self, v1, v2) -> None:
@@ -89,10 +99,12 @@ class Egalite(Constraint):
     def unsat(self, domains: Dict[str, List[int]]) -> bool:
         if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
             return True
-        return not (
-                (max(domains[self.v1]) >= min(domains[self.v2]) and min(domains[self.v1]) <= min(domains[self.v2])) or (
-                    max(domains[self.v2]) >= min(domains[self.v1]) and max(domains[self.v2]) <= max(
-                domains[self.v1])))  # le plus grand élément de v1 est sup ou plus petit de v2
+        else :
+            for i in domains[self.v1]:
+                for j in domains[self.v2]:
+                    if(i==j):
+                        return False
+            return True
 
     def checkSupport(self, var, value, domains) -> bool:
         if var == self.v1:
@@ -103,8 +115,6 @@ class Egalite(Constraint):
             if (value == valueTest):
                 return True
         return False
-
-    ##contraintes binaires, ac3, heuristiques
 
     def getNumSupport(self, var: Var, domains: Dict[Var, List[Value]]) -> int:
         nb_support = 0
@@ -117,6 +127,10 @@ class Egalite(Constraint):
                 if val == val_to_test: nb_support += 1
         return nb_support
 
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        return value1 == value2
+
 
 class Superieur(Constraint):
     def __init__(self, v1: str, v2: str):
@@ -128,7 +142,7 @@ class Superieur(Constraint):
         if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
             return True
         return not (
-        (max(domains[self.v1]) > min(domains[self.v2])))  # le plus grand élément de v1 est sup ou plus petit de v2
+            (max(domains[self.v1]) > min(domains[self.v2])))  # le plus grand élément de v1 est sup au plus petit de v2
 
     def checkSupport(self, var, value, domains) -> bool:
         if var == self.v1:
@@ -143,14 +157,21 @@ class Superieur(Constraint):
             reverse = False
         else:
             varTest = self.v1
-            reverse=True
+            reverse = True
         for val in domains[var]:
             for val_to_test in domains[varTest]:
-                if(reverse):
+                if (reverse):
                     if val < val_to_test: nb_support += 1
                 else:
                     if val > val_to_test: nb_support += 1
         return nb_support
+
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        if(var1==self.variables[0]):
+            return value1>value2
+        else:
+            return value1<value2
 
 
 class SuperieurOuEgal(Constraint):
@@ -179,14 +200,22 @@ class SuperieurOuEgal(Constraint):
             reverse = False
         else:
             varTest = self.v1
-            reverse=True
+            reverse = True
         for val in domains[var]:
             for val_to_test in domains[varTest]:
-                if(reverse):
+                if (reverse):
                     if val <= val_to_test: nb_support += 1
                 else:
                     if val >= val_to_test: nb_support += 1
         return nb_support
+
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        if(var1==self.variables[0]):
+            return value1>=value2
+        else:
+            return value1<=value2
+
 
 class Inferieur(Constraint):
     def __init__(self, v1: str, v2: str):
@@ -198,8 +227,8 @@ class Inferieur(Constraint):
         if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
             return True
         return not (
-            (max(domains[self.v1]) < min(
-                domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
+            (min(domains[self.v1]) < max(
+                domains[self.v2])))  # test si le plus petit élément de v1 est < au plus grand de v2
 
     def checkSupport(self, var, value, domains) -> bool:
         if var == self.v1:
@@ -214,14 +243,21 @@ class Inferieur(Constraint):
             reverse = False
         else:
             varTest = self.v1
-            reverse=True
+            reverse = True
         for val in domains[var]:
             for val_to_test in domains[varTest]:
-                if(reverse):
+                if (reverse):
                     if val > val_to_test: nb_support += 1
                 else:
                     if val < val_to_test: nb_support += 1
         return nb_support
+
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        if(var1==self.variables[0]):
+            return value1<value2
+        else:
+            return value1>value2
 
 
 class InferieurOuEgal(Constraint):
@@ -234,8 +270,8 @@ class InferieurOuEgal(Constraint):
         if (len(domains[self.v1]) == 0 or len(domains[self.v2]) == 0):
             return True
         return not (
-            (max(domains[self.v1]) >= min(
-                domains[self.v2])))  # test si le plus grand élément de v1 est >= au plus petit de v2
+            (min(domains[self.v1]) <= max(
+                domains[self.v2])))  # test si le plus petit élément de v1 est <= au plus grand de v2
 
     def checkSupport(self, var, value, domains) -> bool:
         if var == self.v1:
@@ -250,14 +286,21 @@ class InferieurOuEgal(Constraint):
             reverse = False
         else:
             varTest = self.v1
-            reverse=True
+            reverse = True
         for val in domains[var]:
             for val_to_test in domains[varTest]:
-                if(reverse):
+                if (reverse):
                     if val >= val_to_test: nb_support += 1
                 else:
                     if val <= val_to_test: nb_support += 1
         return nb_support
+
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        if(var1==self.variables[0]):
+            return value1<=value2
+        else:
+            return value1>=value2
 
 
 class Table(Constraint):
@@ -287,3 +330,16 @@ class Table(Constraint):
 
     def getNumSupport(self, var: Var, domains: Dict[Var, List[Value]]) -> int:
         return len(self.table)
+
+    def checkSupported(self, var1: Var, var2: Var, value1: Value, value2: Value,
+                       domains: Dict[Var, List[Value]]) -> bool:
+        if var1 == self.variables[0]:
+            indice = 0
+            varTest = self.variables[1]
+        else:
+            indice = 1
+            varTest = self.variables[0]
+        for couple in self.table:
+            if (couple[indice] == value1 and couple[(indice+1)%2]== value2):
+                return True
+        return False
